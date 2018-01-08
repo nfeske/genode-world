@@ -5,10 +5,10 @@ set app_config {
 <start name="atari800" priority="-2" caps="200">
 	<resource name="RAM" quantum="64M"/>
 	<config>
-		<libc stdout="/dev/log" stderr="/dev/log" rtc="/dev/null"/>
+		<libc stdout="/dev/log" stderr="/dev/log" rtc="/dev/rtc"/>
 		<vfs>
 			<tar name="atari800_rom.tar" />
-			<dir name="dev"> <log/> <null/> </dir>
+			<dir name="dev"> <log/> <inline name="rtc">2000-01-01 00:00</inline> </dir>
 			<ram/>
 		</vfs>
 		<arg value="atari800"/>
