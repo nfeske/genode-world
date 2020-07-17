@@ -62,24 +62,13 @@ append config {
 		<any-service> <parent/> <any-child/> </any-service>
 	</default-route>
 	<default caps="128"/>
+
 	<start name="fb_sdl" ld="no">
 		<resource name="RAM" quantum="4M"/>
-		<provides> <service name="Input"/> </provides>
 		<config width="800" height="600"/>
 		<route> <any-service> <parent/> <any-child/> </any-service> </route>
 	</start>
-	<start name="input_event_bridge">
-		<resource name="RAM" quantum="1M"/>
-		<provides>
-			<service name="Event"/>
-			<service name="Input"/>
-		</provides>
-		<config/>
-		<route>
-			<any-service> <parent/> </any-service>
-		</route>
-	</start>
-	<alias name="input_drv" child="input_event_bridge"/>
+
 	<start name="timer">
 		<resource name="RAM" quantum="1M"/>
 		<provides><service name="Timer"/></provides>
@@ -108,8 +97,9 @@ append config {
 
 			<output node="config">
 				<attribute name="request_framebuffer" value="no"/>
+				<attribute name="request_input" value="no"/>
 				<inline>
-					<capture/>
+					<capture/> <event/>
 					<report focus="yes" xray="yes" hover="yes" />
 					<domain name="pointer" layer="2" content="client" label="no" origin="pointer" />
 				</inline>
@@ -148,10 +138,11 @@ append config {
 
 	<start name="nitpicker">
 		<resource name="RAM" quantum="4M"/>
-		<provides> <service name="Gui"/> <service name="Capture"/> </provides>
+		<provides>
+			<service name="Gui"/> <service name="Capture"/> <service name="Event"/>
+		</provides>
 		<route>
 			<service name="ROM" label="config"> <child name="nitpicker_config"/> </service>
-			<service name="Input"> <child name="input_drv" /> </service>
 			<service name="Report"> <child name="report_rom" /> </service>
 			<any-service> <parent/> <any-child/> </any-service>
 		</route>

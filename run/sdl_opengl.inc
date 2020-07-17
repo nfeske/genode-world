@@ -18,7 +18,7 @@ set build_components {
 	drivers/gpu/intel
 	server/liquid_framebuffer
 	server/nitpicker
-	server/input_event_bridge
+	app/input_event_client
 	lib/mesa/swrast
 	app/launchpad
 	app/pointer
@@ -56,26 +56,15 @@ set config {
 append_if [have_spec linux] config {
 	<start name="fb_sdl" caps="200" ld="no">
 		<resource name="RAM" quantum="4M"/>
-		<provides> <service name="Input"/> </provides>
-	</start>
-	<start name="input_event_bridge">
-		<resource name="RAM" quantum="1M"/>
-		<provides>
-			<service name="Event"/>
-			<service name="Input"/>
-		</provides>
 		<config/>
-		<route>
-			<any-service> <parent/> </any-service>
-		</route>
-	</start>
-	<alias name="input_drv" child="input_event_bridge"/> }
+	</start>}
 
 append_platform_drv_config
 
 append_if [expr ![have_spec linux]] config {
 	<start name="fb_drv">
 		<resource name="RAM" quantum="10M"/>
+		<config/>
 		<route><any-service> <parent /> <any-child/> </any-service> </route>
 	</start>}
 
@@ -83,8 +72,18 @@ append_if [have_spec ps2] config {
 	<start name="ps2_drv">
 		<resource name="RAM" quantum="2M"/>
 		<provides> <service name="Input"/> </provides>
+		<config/>
 	</start>
-	<alias name="input_drv" child="ps2_drv"/> }
+	<start name="ps2" caps="90">
+		<resource name="RAM" quantum="1M"/>
+		<binary name="input_event_client"/>
+		<config/>
+		<route>
+			<service name="Event"> <child name="nitpicker"/> </service>
+			<service name="Input"> <child name="ps2_drv"/> </service>
+			<any-service> <parent/> </any-service>
+		</route>
+	</start>}
 
 append config {
 	<start name="timer">
@@ -93,18 +92,17 @@ append config {
 	</start>
 	<start name="nitpicker">
 		<resource name="RAM" quantum="1M"/>
-		<provides> <service name="Gui"/> <service name="Capture"/> </provides>
-		<config request_framebuffer="no">
-			<capture/>
+		<provides>
+			<service name="Gui"/> <service name="Capture"/> <service name="Event"/>
+		</provides>
+		<config request_framebuffer="no" request_input="no">
+			<capture/> <event/>
 			<domain name="pointer" layer="1" content="client" label="no" origin="pointer" />
 			<domain name="default" layer="2" content="client" label="no" focus="click" hover="always" />
 			<policy label_prefix="pointer" domain="pointer"/>
 			<default-policy                domain="default"/>
 		</config>
-		<route>
-			<service name="Input"> <child name="input_drv"/> </service>
-			<any-service> <parent/> <any-child/> </any-service>
-		</route>
+		<route> <any-service> <parent/> <any-child/> </any-service> </route>
 	</start>
 	<start name="pointer">
 		<resource name="RAM" quantum="1M"/>
@@ -190,7 +188,7 @@ install_config $config
 set boot_modules {
 	core init ld.lib.so timer nitpicker pointer liquid_fb
 	launchpad
-	input_event_bridge
+	input_event_client
 
 	libc.lib.so vfs.lib.so libm.lib.so
 	egl.lib.so mesa.lib.so stdcxx.lib.so
