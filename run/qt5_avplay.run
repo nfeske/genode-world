@@ -3,10 +3,7 @@ source ${genode_dir}/repos/libports/run/qt5_common.inc
 import_from_depot [depot_user]/raw/qt5_avplay \
                   [depot_user]/src/avplay \
                   [depot_user]/src/libav \
-                  [depot_user]/src/qt5_avplay \
-                  [depot_user]/src/qt5_qgenodeviewwidget \
-                  [depot_user]/src/qt5_widgets \
-                  [depot_user]/src/qt5_xml \
+                  [depot_user]/src/qt5_component \
                   [depot_user]/src/vfs_pipe \
                   [depot_user]/src/sdl
 
